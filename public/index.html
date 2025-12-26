@@ -3,215 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Лабораторная работа с БД</title>
+    <title>Лабораторная: Docker + PostgreSQL</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
         
         .container {
+            max-width: 1000px;
+            margin: 0 auto;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 800px;
-            padding: 40px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         
         h1 {
             color: #333;
-            margin-bottom: 20px;
             text-align: center;
-            font-size: 2.5em;
-        }
-        
-        h2 {
-            color: #555;
-            margin: 30px 0 15px 0;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
+            margin-bottom: 30px;
         }
         
         .section {
             background: #f8f9fa;
-            border-radius: 10px;
             padding: 20px;
+            border-radius: 8px;
             margin-bottom: 20px;
+            border-left: 4px solid #667eea;
         }
         
         .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #667eea;
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
+            margin: 5px;
             font-size: 16px;
-            margin: 10px 5px;
-            transition: transform 0.2s, box-shadow 0.2s;
         }
         
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
+            background: #5a67d8;
         }
         
         .result {
             background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
             padding: 15px;
-            margin-top: 15px;
+            margin-top: 10px;
             font-family: 'Courier New', monospace;
             white-space: pre-wrap;
-            word-break: break-all;
             max-height: 400px;
             overflow-y: auto;
         }
+        
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
         
         .status {
             padding: 10px;
             border-radius: 5px;
             margin: 10px 0;
-            font-weight: bold;
+            display: none;
         }
         
-        .success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .instructions {
+        .db-info {
             background: #e3f2fd;
-            border-left: 4px solid #2196f3;
             padding: 15px;
-            margin: 20px 0;
-            border-radius: 0 8px 8px 0;
-        }
-        
-        code {
-            background: #f1f1f1;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
+            border-radius: 5px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔬 Лабораторная работа</h1>
-        <h2>Веб-приложение с базой данных</h2>
+        <h1>🔬 Лабораторная работа: Docker + PostgreSQL</h1>
         
-        <div class="instructions">
-            <p><strong>Инструкция:</strong></p>
-            <p>1. Сначала проверьте работу сервера</p>
-            <p>2. Затем проверьте подключение к БД</p>
-            <p>3. Для работы с БД нужно обновить server.js с настройками вашей базы</p>
+        <div class="db-info">
+            <h3>📊 Информация о подключении:</h3>
+            <p><strong>Хост:</strong> <span id="db-host">host.docker.internal</span></p>
+            <p><strong>База данных:</strong> <span id="db-name">company_db</span></p>
+            <p><strong>Пользователь:</strong> <span id="db-user">GRON8916</span></p>
+            <p><strong>Режим:</strong> <span id="docker-mode">Docker контейнер</span></p>
         </div>
         
-        <!-- Секция 1: Проверка сервера -->
         <div class="section">
-            <h3>1. Проверка работы сервера</h3>
-            <p>Нажмите кнопку чтобы убедиться что сервер отвечает:</p>
-            <button class="btn" onclick="checkServer()">🔄 Проверить сервер</button>
-            <div id="serverResult" class="result">
-                Нажмите кнопку для проверки...
-            </div>
-        </div>
-        
-        <!-- Секция 2: Проверка БД -->
-        <div class="section">
-            <h3>2. Проверка подключения к базе данных</h3>
-            <p>Проверка соединения с PostgreSQL:</p>
+            <h3>1. Проверка системы</h3>
+            <button class="btn" onclick="checkHealth()">🔄 Проверить сервер</button>
             <button class="btn" onclick="checkDB()">📊 Проверить БД</button>
-            <div id="dbResult" class="result">
-                Подключение к БД еще не настроено...
-            </div>
+            <div id="healthResult" class="result">Нажмите кнопку для проверки...</div>
         </div>
         
-        <!-- Секция 3: Данные из БД -->
         <div class="section">
-            <h3>3. Получение данных из базы</h3>
-            <p>Получить данные из таблицы:</p>
+            <h3>2. Работа с базой данных</h3>
+            <button class="btn" onclick="getTables()">📋 Список таблиц</button>
             <button class="btn" onclick="getData()">📈 Получить данные</button>
-            <div id="dataResult" class="result">
-                Данные появятся здесь...
-            </div>
+            <button class="btn" onclick="getStats()">📊 Статистика БД</button>
+            <div id="dbResult" class="result">Результаты появятся здесь...</div>
         </div>
         
-        <!-- Статус приложения -->
+        <div class="section">
+            <h3>3. Работа с конкретной таблицей</h3>
+            <input type="text" id="tableName" placeholder="Введите имя таблицы" style="padding: 8px; width: 200px;">
+            <button class="btn" onclick="getTableData()">🔍 Получить данные таблицы</button>
+            <div id="tableResult" class="result">Введите имя таблицы и нажмите кнопку...</div>
+        </div>
+        
         <div id="status" class="status"></div>
         
-        <!-- Информация -->
         <div style="text-align: center; margin-top: 30px; color: #666;">
-            <p>Используйте консоль разработчика (F12) для просмотра запросов</p>
-            <p>Порт сервера: <code>3000</code> | Путь к API: <code>/api/*</code></p>
+            <p>💡 Используйте F12 (Developer Tools) для просмотра запросов</p>
+            <p>🐳 Приложение запущено в Docker контейнере</p>
         </div>
     </div>
 
     <script>
-        // Функция для отображения статуса
+        // Отображение статуса
         function showStatus(message, type = 'info') {
             const statusDiv = document.getElementById('status');
             statusDiv.textContent = message;
             statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+            
             setTimeout(() => {
-                statusDiv.textContent = '';
-                statusDiv.className = 'status';
-            }, 5000);
+                statusDiv.style.display = 'none';
+            }, 3000);
         }
 
         // 1. Проверка сервера
-        async function checkServer() {
-            const resultDiv = document.getElementById('serverResult');
+        async function checkHealth() {
+            const resultDiv = document.getElementById('healthResult');
             try {
-                resultDiv.innerHTML = '⏳ Отправка запроса к серверу...';
-                const response = await fetch('/api/hello');
-                
-                if (!response.ok) {
-                    throw new Error(`Ошибка HTTP: ${response.status}`);
-                }
-                
+                resultDiv.innerHTML = '⏳ Проверка сервера...';
+                const response = await fetch('/api/health');
                 const data = await response.json();
-                resultDiv.innerHTML = 
-                    `<div class="success">✅ Сервер работает!</div>
-                    <br><strong>Ответ сервера:</strong><br>
-                    ${JSON.stringify(data, null, 2)}`;
                 
-                showStatus('Сервер успешно отвечает', 'success');
+                resultDiv.innerHTML = `<span class="success">✅ Сервер работает!</span>\n\n${JSON.stringify(data, null, 2)}`;
+                showStatus('Сервер работает нормально', 'success');
             } catch (error) {
-                resultDiv.innerHTML = 
-                    `<div class="error">❌ Ошибка подключения к серверу</div>
-                    <br><strong>Ошибка:</strong><br>${error.message}
-                    <br><br><strong>Что проверить:</strong>
-                    <ul>
-                        <li>Запущен ли сервер (node server.js)</li>
-                        <li>Правильный ли порт (обычно 3000)</li>
-                        <li>Нет ли блокировки брандмауэром</li>
-                    </ul>`;
+                resultDiv.innerHTML = `<span class="error">❌ Ошибка: ${error.message}</span>`;
                 showStatus('Ошибка подключения к серверу', 'error');
             }
         }
@@ -222,102 +159,170 @@
             try {
                 resultDiv.innerHTML = '⏳ Проверка подключения к базе данных...';
                 const response = await fetch('/api/db-test');
-                
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        throw new Error('Эндпоинт /api/db-test не найден. Нужно добавить его в server.js');
-                    }
-                    throw new Error(`Ошибка HTTP: ${response.status}`);
-                }
-                
                 const data = await response.json();
-                resultDiv.innerHTML = 
-                    `<div class="success">✅ Подключение к БД успешно!</div>
-                    <br><strong>Ответ базы данных:</strong><br>
-                    ${JSON.stringify(data, null, 2)}`;
                 
-                showStatus('Подключение к БД установлено', 'success');
+                if (data.success) {
+                    resultDiv.innerHTML = `<span class="success">✅ Подключение к БД успешно!</span>\n\n${JSON.stringify(data, null, 2)}`;
+                    showStatus('Подключение к БД установлено', 'success');
+                } else {
+                    resultDiv.innerHTML = `<span class="error">❌ Ошибка БД: ${data.error}</span>\n\n${JSON.stringify(data, null, 2)}`;
+                    showStatus('Ошибка подключения к БД', 'error');
+                }
             } catch (error) {
-                resultDiv.innerHTML = 
-                    `<div class="error">⚠️ Не удалось подключиться к БД</div>
-                    <br><strong>Ошибка:</strong><br>${error.message}
-                    <br><br><strong>Для настройки БД:</strong>
-                    <ol>
-                        <li>Откройте файл server.js</li>
-                        <li>Раскомментируйте код подключения к PostgreSQL</li>
-                        <li>Укажите правильные параметры подключения</li>
-                        <li>Добавьте эндпоинт /api/db-test</li>
-                    </ol>`;
-                showStatus('Требуется настройка подключения к БД', 'error');
+                resultDiv.innerHTML = `<span class="error">❌ Ошибка сети: ${error.message}</span>`;
+                showStatus('Ошибка сети', 'error');
             }
         }
 
-        // 3. Получение данных из БД
-        async function getData() {
-            const resultDiv = document.getElementById('dataResult');
+        // 3. Получение списка таблиц
+        async function getTables() {
+            const resultDiv = document.getElementById('dbResult');
             try {
-                resultDiv.innerHTML = '⏳ Загрузка данных из базы...';
-                const response = await fetch('/api/data');
-                
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        throw new Error('Эндпоинт /api/data не найден. Добавьте его в server.js');
-                    }
-                    throw new Error(`Ошибка HTTP: ${response.status}`);
-                }
-                
+                resultDiv.innerHTML = '⏳ Получение списка таблиц...';
+                const response = await fetch('/api/tables');
                 const data = await response.json();
                 
-                if (data.length === 0) {
-                    resultDiv.innerHTML = 
-                        `<div class="error">📭 База данных пуста или таблица не найдена</div>
-                        <br><strong>Что проверить:</strong>
-                        <ul>
-                            <li>Существует ли таблица в БД</li>
-                            <li>Правильное ли имя таблицы в server.js</li>
-                            <li>Есть ли данные в таблице</li>
-                        </ul>`;
-                    return;
+                if (data.success && data.tables.length > 0) {
+                    let html = `<span class="success">✅ Найдено таблиц: ${data.count}</span>\n\n`;
+                    html += '<ul>';
+                    data.tables.forEach(table => {
+                        html += `<li><strong>${table.table_name}</strong> (${table.columns_count} колонок)</li>`;
+                    });
+                    html += '</ul>';
+                    resultDiv.innerHTML = html;
+                    showStatus(`Найдено ${data.count} таблиц`, 'success');
+                } else {
+                    resultDiv.innerHTML = `<span class="warning">⚠️ В базе данных нет таблиц</span>`;
+                    showStatus('Таблицы не найдены', 'warning');
                 }
-                
-                // Создаем красивую таблицу
-                let html = `<div class="success">✅ Получено записей: ${data.length}</div><br>`;
-                html += '<table style="width:100%; border-collapse:collapse;">';
-                
-                // Заголовки таблицы
-                html += '<thead><tr style="background:#667eea;color:white;">';
-                for (const key in data[0]) {
-                    html += `<th style="padding:10px;text-align:left;">${key}</th>`;
-                }
-                html += '</tr></thead><tbody>';
-                
-                // Данные
-                data.forEach((row, index) => {
-                    const bgColor = index % 2 === 0 ? '#f8f9fa' : 'white';
-                    html += `<tr style="background:${bgColor}">`;
-                    for (const key in row) {
-                        html += `<td style="padding:8px;border-bottom:1px solid #dee2e6;">${row[key]}</td>`;
-                    }
-                    html += '</tr>';
-                });
-                
-                html += '</tbody></table>';
-                resultDiv.innerHTML = html;
-                
-                showStatus(`Загружено ${data.length} записей`, 'success');
             } catch (error) {
-                resultDiv.innerHTML = 
-                    `<div class="error">❌ Ошибка загрузки данных</div>
-                    <br><strong>Ошибка:</strong><br>${error.message}`;
-                showStatus('Ошибка загрузки данных из БД', 'error');
+                resultDiv.innerHTML = `<span class="error">❌ Ошибка: ${error.message}</span>`;
+                showStatus('Ошибка получения таблиц', 'error');
             }
         }
 
-        // Автоматическая проверка сервера при загрузке
+        // 4. Получение данных из БД
+        async function getData() {
+            const resultDiv = document.getElementById('dbResult');
+            try {
+                resultDiv.innerHTML = '⏳ Загрузка данных...';
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = `<span class="success">✅ Данные из таблицы "${data.table}"</span>\n`;
+                    html += `<p>Найдено записей: ${data.count}</p>\n`;
+                    
+                    if (data.data.length > 0) {
+                        // Создаем таблицу
+                        html += '<table border="1" cellpadding="5" style="width:100%; border-collapse:collapse;">';
+                        // Заголовки
+                        html += '<tr style="background:#667eea;color:white;">';
+                        Object.keys(data.data[0]).forEach(key => {
+                            html += `<th>${key}</th>`;
+                        });
+                        html += '</tr>';
+                        // Данные
+                        data.data.forEach(row => {
+                            html += '<tr>';
+                            Object.values(row).forEach(value => {
+                                html += `<td>${value}</td>`;
+                            });
+                            html += '</tr>';
+                        });
+                        html += '</table>';
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                    showStatus(`Загружено ${data.count} записей`, 'success');
+                } else {
+                    resultDiv.innerHTML = `<span class="error">❌ Ошибка: ${data.error}</span>`;
+                    showStatus('Ошибка загрузки данных', 'error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Ошибка: ${error.message}</span>`;
+                showStatus('Ошибка загрузки данных', 'error');
+            }
+        }
+
+        // 5. Получение статистики
+        async function getStats() {
+            const resultDiv = document.getElementById('dbResult');
+            try {
+                resultDiv.innerHTML = '⏳ Получение статистики...';
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<span class="success">✅ Статистика базы данных</span>\n\n${JSON.stringify(data.statistics, null, 2)}`;
+                    showStatus('Статистика получена', 'success');
+                } else {
+                    resultDiv.innerHTML = `<span class="error">❌ Ошибка: ${data.error}</span>`;
+                    showStatus('Ошибка получения статистики', 'error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Ошибка: ${error.message}</span>`;
+                showStatus('Ошибка получения статистики', 'error');
+            }
+        }
+
+        // 6. Получение данных конкретной таблицы
+        async function getTableData() {
+            const tableName = document.getElementById('tableName').value.trim();
+            const resultDiv = document.getElementById('tableResult');
+            
+            if (!tableName) {
+                resultDiv.innerHTML = '<span class="warning">⚠️ Введите имя таблицы</span>';
+                return;
+            }
+            
+            try {
+                resultDiv.innerHTML = `⏳ Загрузка данных из таблицы "${tableName}"...`;
+                const response = await fetch(`/api/table/${tableName}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = `<span class="success">✅ Данные из таблицы "${data.table}"</span>\n`;
+                    html += `<p>Найдено записей: ${data.count}</p>\n`;
+                    
+                    if (data.data.length > 0) {
+                        html += '<table border="1" cellpadding="5" style="width:100%; border-collapse:collapse;">';
+                        // Заголовки
+                        html += '<tr style="background:#5a67d8;color:white;">';
+                        Object.keys(data.data[0]).forEach(key => {
+                            html += `<th>${key}</th>`;
+                        });
+                        html += '</tr>';
+                        // Данные
+                        data.data.forEach(row => {
+                            html += '<tr>';
+                            Object.values(row).forEach(value => {
+                                html += `<td>${value || ''}</td>`;
+                            });
+                            html += '</tr>';
+                        });
+                        html += '</table>';
+                    } else {
+                        html += '<p>Таблица пуста</p>';
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                    showStatus(`Загружены данные из таблицы "${tableName}"`, 'success');
+                } else {
+                    resultDiv.innerHTML = `<span class="error">❌ Ошибка: ${data.error}</span>`;
+                    showStatus(`Ошибка: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Ошибка сети: ${error.message}</span>`;
+                showStatus('Ошибка сети', 'error');
+            }
+        }
+
+        // Автоматическая проверка при загрузке
         window.onload = function() {
             console.log('Страница загружена. Готово к тестированию.');
-            // Можно автоматически проверить сервер:
-            // checkServer();
+            // Автоматически проверяем сервер
+            setTimeout(checkHealth, 500);
         };
     </script>
 </body>

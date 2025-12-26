@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      # Подключаемся к вашей локальной БД из pgAdmin
+      - DB_HOST=host.docker.internal  # Специальное имя для доступа к хосту из Docker
+      - DB_PORT=5432
+      - DB_USER=GRON8916
+      - DB_PASSWORD=31052004
+      - DB_NAME=company_db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Для Windows/Mac
+    restart: unless-stopped
+    volumes:
+      - ./public:/app/public  # Для быстрого обновления HTML
+      - ./server.js:/app/server.js  # Для быстрого обновления кода
+
+  # УДАЛЯЕМ сервис db, так как используем вашу существующую БД
+  # pgadmin можно оставить опционально
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@lab.com
+      - PGADMIN_DEFAULT_PASSWORD=admin123
+    ports:
+      - "5050:80"
+    restart: unless-stopped
+
+# УДАЛЯЕМ volumes, так как не создаем новую БД
